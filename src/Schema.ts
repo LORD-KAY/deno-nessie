@@ -1,5 +1,12 @@
-import { Table } from "./Table.ts";
+import { Table, tableOptions } from "./Table.ts";
 import { dbDialects } from "./TypeUtils.ts";
+
+export type tablefn = (table: Table) => void;
+export type schemaCreateArgs = [string, tablefn] | [
+  string,
+  tableOptions,
+  tablefn,
+];
 
 /** The schema class exposed in the `up()` and `down()` methods in the migration files.
  * 
@@ -14,11 +21,34 @@ export class Schema {
   }
 
   /** Method for exposing a Table instance for creating a table with columns */
-  create(
+  create(...args: schemaCreateArgs): string {
+    let options = { dbDialect: this.dialect };
+    let createfn: tablefn;
+    if (args.length > 2) {
+      options = { ...options, ...args[1] };
+      createfn = args[2] as tablefn;
+    } else {
+      createfn = args[1] as tablefn;
+    }
+
+    const table = new Table(args[0], options);
+
+    createfn(table);
+
+    const sql = table.toSql();
+
+    this.query += sql;
+
+    return sql;
+  }
+
+  /** Method for exposing a Table instance for creating a table with columns */
+  _create(
     name: string,
+    options: tableOptions,
     createfn: (table: Table) => void,
   ): string {
-    const table = new Table(name, this.dialect);
+    const table = new Table(name, { dbDialect: this.dialect, ...options });
 
     createfn(table);
 
