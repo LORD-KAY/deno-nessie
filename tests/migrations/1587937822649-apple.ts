@@ -1,7 +1,7 @@
 import { Schema } from "../../mod.ts";
 
-export const up = (scema: Schema): void => {
-  scema.create("apple", (table) => {
+export const up = (schema: Schema): void => {
+  schema.create("apple", (table) => {
     table.id();
     table.string("col_1", 10);
     table.timestamps();
