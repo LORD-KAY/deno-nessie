@@ -2,6 +2,13 @@ import { Table, tableOptions } from "./Table.ts";
 import { dbDialects } from "./TypeUtils.ts";
 
 export type tablefn = (table: Table) => void;
+export interface createOptions extends tableOptions {
+  name: string;
+}
+export interface dropOptions extends createOptions {
+  ifExists?: boolean
+  cascade?: boolean
+}
 export type schemaCreateArgs = [string, tablefn] | [
   string,
   tableOptions,
@@ -21,34 +28,17 @@ export class Schema {
   }
 
   /** Method for exposing a Table instance for creating a table with columns */
-  create(...args: schemaCreateArgs): string {
-    let options = { dbDialect: this.dialect };
-    let createfn: tablefn;
-    if (args.length > 2) {
-      options = { ...options, ...args[1] };
-      createfn = args[2] as tablefn;
+  create(name: string, createfn: tablefn): string;
+  create(options: createOptions, createfn: tablefn): string;
+  create(options: string | createOptions, createfn: tablefn): string {
+    let table: Table;
+    if (typeof options === "string") {
+      table = new Table(options, { dbDialect: this.dialect });
     } else {
-      createfn = args[1] as tablefn;
+      const name = options.name;
+      delete options.name;
+      table = new Table(name, { dbDialect: this.dialect, ...options });
     }
-
-    const table = new Table(args[0], options);
-
-    createfn(table);
-
-    const sql = table.toSql();
-
-    this.query += sql;
-
-    return sql;
-  }
-
-  /** Method for exposing a Table instance for creating a table with columns */
-  _create(
-    name: string,
-    options: tableOptions,
-    createfn: (table: Table) => void,
-  ): string {
-    const table = new Table(name, { dbDialect: this.dialect, ...options });
 
     createfn(table);
 
@@ -76,12 +66,32 @@ export class Schema {
       name.join(
         ", ",
       )
-    }${cascade ? " CASCADE" : ""};`;
+      }${cascade ? " CASCADE" : ""};`;
 
     this.query += sql;
 
     return sql;
   }
+  // drop(name: string | string[]): string
+  // drop(options: dropOptions): string
+  // drop(name: string | string[] | dropOptions): string {
+  //   let options: Partial<dropOptions> = {}
+  //   if (typeof name === "string") name = [name];
+  //   else if (!Array.isArray(name)) {
+  //     options = name
+  //     name = [name.name]
+  //   }
+
+  //   const sql = `DROP TABLE${options?.ifExists ? " IF EXISTS" : ""} ${
+  //     name.join(
+  //       ", ",
+  //     )
+  //     }${options?.cascade ? " CASCADE" : ""};`;
+
+  //   this.query += sql;
+
+  //   return sql;
+  // }
 
   /** Generates a string for checking if a table exists */
   hasTable(name: string) {

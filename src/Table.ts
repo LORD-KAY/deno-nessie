@@ -16,6 +16,12 @@ export interface TableConstraints {
   isTemporary?: boolean;
 }
 
+export type tableOptions = {
+  dbDialect?: dbDialects;
+  schemaName?: string;
+  schemaCreate?: boolean; // Creates schema if not exists, defaults to false
+};
+
 /** The table class exposed in the second argument `schema.create()` method.
  * 
  * By using this exposed class, you can add columns and return it as a sql string using `toSql()`.
@@ -23,6 +29,9 @@ export interface TableConstraints {
 export class Table {
   private dialect: dbDialects;
   private tableName: string;
+  private tableNameFull: string;
+  private schemaName: string;
+  private schemaCreate: boolean;
   private columns: Column[];
   private customColumns?: string[];
   private constraints: TableConstraints = {
@@ -32,15 +41,28 @@ export class Table {
     updatedAt: false,
   };
 
-  constructor(name: string, dbDialect: dbDialects = "pg") {
+  constructor(name: string, options?: tableOptions) {
+    this.dialect = options?.dbDialect ?? "pg";
+    this.schemaName = options?.schemaName
+      ? options.schemaName
+      : this.dialect === "pg"
+      ? "public"
+      : "";
+
     this.tableName = name;
     this.columns = [];
-    this.dialect = dbDialect;
+    this.schemaCreate = !!options?.schemaCreate;
+
+    this.tableNameFull = this.schemaName !== ""
+      ? this.schemaName + "." + this.tableName
+      : this.tableName;
   }
 
   /** Outputs the SQL query. */
   toSql(): string {
     let sql = "";
+
+    sql += this._schemaHandler();
 
     this.constraints.enums.forEach((enumCol) => {
       sql += this._enumHandler(enumCol);
@@ -63,6 +85,14 @@ export class Table {
     sql += this._updatedAtHandler();
 
     return sql;
+  }
+
+  private _schemaHandler(): string {
+    if (this.schemaName.length > 0 && this.schemaCreate) {
+      return `CREATE SCHEMA IF NOT EXISTS ${this.schemaName}; `;
+    } else {
+      return "";
+    }
   }
 
   /** Helper method for pushing to column. */
@@ -97,7 +127,7 @@ export class Table {
           this.constraints.isTemporary ? " TEMPORARY" : ""
         } TABLE${
           this.constraints.ifNotExists ? " IF NOT EXISTS" : ""
-        } ${this.tableName}`;
+        } ${this.tableNameFull}`;
     }
   }
 
@@ -145,7 +175,7 @@ export class Table {
       case "mysql":
       case "pg":
       default:
-        return ` ALTER TABLE ${this.tableName} ADD ${uniqueType} (${uniqueString});`;
+        return ` ALTER TABLE ${this.tableNameFull} ADD ${uniqueType} (${uniqueString});`;
     }
   }
 
@@ -155,7 +185,7 @@ export class Table {
       case "mysql":
       case "pg":
       default:
-        return ` CREATE INDEX ON ${this.tableName} (${index});`;
+        return ` CREATE INDEX ON ${this.tableNameFull} (${index});`;
     }
   }
 
@@ -167,10 +197,10 @@ export class Table {
       case "mysql":
         return "";
       case "sqlite":
-        return ` DROP TRIGGER IF EXISTS set_timestamp; CREATE TRIGGER set_timestamp BEFORE UPDATE ON ${this.tableName} FOR EACH ROW BEGIN UPDATE ${this.tableName} SET updated_at = CURRENT_TIMESTAMP WHERE id=OLD.id\\; END;`;
+        return ` DROP TRIGGER IF EXISTS set_timestamp; CREATE TRIGGER set_timestamp BEFORE UPDATE ON ${this.tableNameFull} FOR EACH ROW BEGIN UPDATE ${this.tableNameFull} SET updated_at = CURRENT_TIMESTAMP WHERE id=OLD.id\\; END;`;
       case "pg":
       default:
-        return ` DROP TRIGGER IF EXISTS set_timestamp on public.${this.tableName}; CREATE TRIGGER set_timestamp BEFORE UPDATE ON public.${this.tableName} FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp();`;
+        return ` DROP TRIGGER IF EXISTS set_timestamp on ${this.tableNameFull}; CREATE TRIGGER set_timestamp BEFORE UPDATE ON ${this.tableNameFull} FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp();`;
     }
   }
 
