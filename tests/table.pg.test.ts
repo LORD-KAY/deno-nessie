@@ -196,7 +196,7 @@ const pgStrings = [
     name: "Table with decimal",
     string: (() => {
       const table = new Table("testName");
-      table.decimal("testCol");
+      table.numeric("testCol");
       return table.toSql();
     })(),
     solution: "CREATE TABLE testName (testCol decimal (8, 2));",
@@ -390,7 +390,7 @@ const pgStrings = [
       return table.toSql();
     })(),
     solution:
-      "CREATE TABLE testName (created_at timestamp (0) default current_timestamp, updated_at timestamp (0) default current_timestamp); DROP TRIGGER IF EXISTS set_timestamp on public.testName; CREATE TRIGGER set_timestamp BEFORE UPDATE ON public.testName FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp();",
+      "CREATE TABLE testName (created_at timestamp (0) default current_timestamp, updated_at timestamp (0) default current_timestamp); DROP TRIGGER IF EXISTS set_timestamp on testName; CREATE TRIGGER set_timestamp BEFORE UPDATE ON testName FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp();",
   },
   {
     name: "Table with timestampsTz",
@@ -400,7 +400,7 @@ const pgStrings = [
       return table.toSql();
     })(),
     solution:
-      "CREATE TABLE testName (created_at timestamptz (0) default current_timestamp, updated_at timestamptz (0) default current_timestamp); DROP TRIGGER IF EXISTS set_timestamp on public.testName; CREATE TRIGGER set_timestamp BEFORE UPDATE ON public.testName FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp();",
+      "CREATE TABLE testName (created_at timestamptz (0) default current_timestamp, updated_at timestamptz (0) default current_timestamp); DROP TRIGGER IF EXISTS set_timestamp on testName; CREATE TRIGGER set_timestamp BEFORE UPDATE ON testName FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp();",
   },
   {
     name: "Table with updatedAt",
@@ -410,7 +410,7 @@ const pgStrings = [
       return table.toSql();
     })(),
     solution:
-      "CREATE TABLE testName (updated_at timestamp (0) default current_timestamp); DROP TRIGGER IF EXISTS set_timestamp on public.testName; CREATE TRIGGER set_timestamp BEFORE UPDATE ON public.testName FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp();",
+      "CREATE TABLE testName (updated_at timestamp (0) default current_timestamp); DROP TRIGGER IF EXISTS set_timestamp on testName; CREATE TRIGGER set_timestamp BEFORE UPDATE ON testName FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp();",
   },
   {
     name: "Table with updatedAtTz",
@@ -420,7 +420,7 @@ const pgStrings = [
       return table.toSql();
     })(),
     solution:
-      "CREATE TABLE testName (updated_at timestamptz (0) default current_timestamp); DROP TRIGGER IF EXISTS set_timestamp on public.testName; CREATE TRIGGER set_timestamp BEFORE UPDATE ON public.testName FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp();",
+      "CREATE TABLE testName (updated_at timestamptz (0) default current_timestamp); DROP TRIGGER IF EXISTS set_timestamp on testName; CREATE TRIGGER set_timestamp BEFORE UPDATE ON testName FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp();",
   },
   {
     name: "Table with text",

@@ -196,7 +196,7 @@ const mySqlStrings = [
     name: "Table with decimal",
     string: (() => {
       const table = new Table("testName", "mysql");
-      table.decimal("testCol");
+      table.numeric("testCol");
       return table.toSql();
     })(),
     solution: "CREATE TABLE testName (testCol decimal (8, 2));",

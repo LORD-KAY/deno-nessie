@@ -42,7 +42,7 @@ export class Column {
     if (this.columnInput1 !== undefined) {
       string += ` (${this.columnInput1}${
         this.columnInput2 ? `, ${this.columnInput2}` : ""
-      })`;
+        })`;
     }
 
     if (this.defaultValue) {
@@ -109,6 +109,9 @@ export class Column {
   autoIncrement() {
     if (this.dialect === "mysql") {
       this.isAutoIncrement = true;
+      if (!this.isPrimary) {
+        this.isUnique = true
+      }
     }
 
     return this;
