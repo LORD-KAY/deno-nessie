@@ -42,7 +42,7 @@ export class Column {
     if (this.columnInput1 !== undefined) {
       string += ` (${this.columnInput1}${
         this.columnInput2 ? `, ${this.columnInput2}` : ""
-      })`;
+        })`;
     }
 
     if (this.defaultValue) {
@@ -107,7 +107,7 @@ export class Column {
 
   /** Makes the column auto incremental, only for integers */
   autoIncrement() {
-    if (this.dialect === "mysql") {
+    if (this.dialect === "mysql" || this.dialect === "sqlite") {
       this.isAutoIncrement = true;
     }
 

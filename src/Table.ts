@@ -46,8 +46,8 @@ export class Table {
     this.schemaName = options?.schemaName
       ? options.schemaName
       : this.dialect === "pg"
-      ? "public"
-      : "";
+        ? "public"
+        : "";
 
     this.tableName = name;
     this.columns = [];
@@ -88,7 +88,7 @@ export class Table {
   }
 
   private _schemaHandler(): string {
-    if (this.schemaName.length > 0 && this.schemaCreate) {
+    if (this.dialect === "pg" && this.schemaName.length > 0 && this.schemaCreate) {
       return `CREATE SCHEMA IF NOT EXISTS ${this.schemaName}; `;
     } else {
       return "";
@@ -125,9 +125,9 @@ export class Table {
       default:
         return `CREATE${
           this.constraints.isTemporary ? " TEMPORARY" : ""
-        } TABLE${
+          } TABLE${
           this.constraints.ifNotExists ? " IF NOT EXISTS" : ""
-        } ${this.tableNameFull}`;
+          } ${this.tableNameFull}`;
     }
   }
 
@@ -156,7 +156,7 @@ export class Table {
           enumCol.columns.join(
             ", ",
           )
-        });`;
+          });`;
     }
   }
 

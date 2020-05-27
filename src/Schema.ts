@@ -72,26 +72,6 @@ export class Schema {
 
     return sql;
   }
-  // drop(name: string | string[]): string
-  // drop(options: dropOptions): string
-  // drop(name: string | string[] | dropOptions): string {
-  //   let options: Partial<dropOptions> = {}
-  //   if (typeof name === "string") name = [name];
-  //   else if (!Array.isArray(name)) {
-  //     options = name
-  //     name = [name.name]
-  //   }
-
-  //   const sql = `DROP TABLE${options?.ifExists ? " IF EXISTS" : ""} ${
-  //     name.join(
-  //       ", ",
-  //     )
-  //     }${options?.cascade ? " CASCADE" : ""};`;
-
-  //   this.query += sql;
-
-  //   return sql;
-  // }
 
   /** Generates a string for checking if a table exists */
   hasTable(name: string) {
